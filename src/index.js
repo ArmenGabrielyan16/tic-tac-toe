@@ -3,8 +3,14 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props) {
+    let style = {};
+
+    if (props.highlight) {
+        style.backgroundColor = 'red';
+    }
+
     return (
-        <button className="square" onClick={props.onClick}>
+        <button className="square" style={style} onClick={props.onClick}>
             {props.value}
         </button>
     );
@@ -12,9 +18,11 @@ function Square(props) {
 
 class Board extends React.Component {
     renderSquare(i) {
+        let highlight = this.props.winnerSquares.indexOf(i) === -1 ? false : true;
         return (
             <Square
                 value={this.props.squares[i]}
+                highlight={highlight}
                 onClick={() => this.props.onClick(i)}
             />
         );
@@ -71,7 +79,7 @@ class Game extends React.Component {
         const current = history[history.length - 1];
         const squares = current.squares.slice();
 
-        if (calculateWinner(squares) || squares[i]) {
+        if (calculateWinner(squares)[0] || squares[i]) {
             return;
         }
 
@@ -96,8 +104,9 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
-
+        const winnerSquares = calculateWinner(current.squares);
+        const winner = winnerSquares[0];
+console.log(winnerSquares);
         const moves = history.map((step, move) => {
             const desc = move ? 'Move #' + move : 'Game start';
 
@@ -121,6 +130,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
+                        winnerSquares={winnerSquares}
                         onClick={(i) => this.handleClick(i)}
                     />
                 </div>
@@ -154,9 +164,9 @@ function calculateWinner(squares) {
         const [a, b, c] = lines[i];
 
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return lines[i];
         }
     }
 
-    return null;
+    return new Array(null);
 }
